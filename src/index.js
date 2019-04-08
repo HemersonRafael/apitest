@@ -7,6 +7,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 //repassando app garante mesma instancia do express
 require('./controllers/authController')(app);
+require('./controllers/projectController')(app);
 
 app.get('/', (req, res) => {
     res.send('<h1>Servidor Ativo</h1>')
