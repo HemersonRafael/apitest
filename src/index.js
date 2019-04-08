@@ -5,10 +5,12 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+//repassando app garante mesma instancia do express
+require('./controllers/authController')(app);
 
-app.get('/', (req, res)=>{
-    res.send('<h1>Hello word!</h1>')
-});
-
-
-app.listen(PORT)
+app.get('/', (req, res) => {
+    res.send('<h1>Servidor Ativo</h1>')
+})
+app.listen(PORT,(req,res) => {
+    console.log(`Ativo em localhost:${PORT}`)
+})
