@@ -1,8 +1,9 @@
 const express = require('express');
-const User = require('../models/user');
+const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const mailer = require('../../modules/mailer');
 const authConfig = require('../../config/auth');
 const router = express.Router();
 
@@ -49,11 +50,11 @@ router.post('/authenticate', async (req, res) => {
 })
 
 router.post('/forgot_password', async(req, res) =>{
-    const {email} =  req.body;
-
+    const { email } =  req.body;
+    console.log(req.body.email)
     try{
-        const user = await User.findOne({email});
-        
+        const user = await User.findOne(email);
+        console.log(user)
         if(!user){
             return res.status(400).send({error: 'User not found'});
         }
@@ -62,13 +63,28 @@ router.post('/forgot_password', async(req, res) =>{
 
         const now = new Date();
         now.setHours(now.getHours() + 1);
+
+
         await User.findByIdAndUpdate(user.id, {
             '$set':{
                 passwordResetToken: token,
                 passwordResetExpires: now,
             }
         });
-        console.log(token, now)
+
+        mailer.sendMail({
+            to: email,
+            from: 'projetosect@gmail.com',
+            template: 'auth/forgot_password',
+            context: {token},
+        }, (err) =>{
+            if(err){
+                return res.status(400).send({error: 'Cannot send forgot password email'});
+            }
+            return res.send();
+        })
+        
+        console.log(token, now);
     }catch(err){
         res.status(400).send({error: 'erro on forgot password, try again'});
     }
